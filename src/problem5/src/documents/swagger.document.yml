@@ -1,0 +1,457 @@
+openapi: 3.0.3
+info:
+  version: 1.0.0
+  title: API Document - OpenAPI
+  description: This is the document about API endpoints
+servers:
+  - url: http://localhost:8000/api
+
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        name:
+          type: string
+          description: HTTP status text
+        code:
+          type: integer
+          description: HTTP status code
+        message:
+          oneOf:
+            - type: array
+              items:
+                $ref: '#/components/schemas/ValidationError'
+              description: Array of validation errors
+            - type: string
+              description: Simple error message
+      example:
+        validationError:
+          value:
+            name: 'Bad Request'
+            code: 400
+            message: [{ field: ['email'], error: 'Invalid email' }]
+        simpleError:
+          value:
+            name: 'Bad Request'
+            code: 400
+            message: 'Invalid input'
+
+    ValidationError:
+      type: object
+      properties:
+        field:
+          type: array
+          items:
+            type: string
+          description: Array of field names that have errors
+        error:
+          type: string
+          description: Error message for the field
+      example:
+        field: ['email']
+        error: 'Invalid email'
+
+    ItemResponse:
+      type: object
+      properties:
+        name:
+          type: string
+          description: HTTP status text
+        code:
+          type: integer
+          description: HTTP status code
+        message:
+          type: string
+          description: Success message
+        data:
+          type: object
+          description: Response data
+
+    PaginationMetadata:
+      type: object
+      properties:
+        take:
+          type: integer
+          description: Number of items per page
+        page:
+          type: integer
+          description: Current page number
+        itemCount:
+          type: integer
+          description: Total number of items
+        pageCount:
+          type: integer
+          description: Total number of pages
+        hasPreviousPage:
+          type: boolean
+          description: Whether there is a previous page
+        hasNextPage:
+          type: boolean
+          description: Whether there is a next page
+        beginRange:
+          type: integer
+          description: Start index of current page
+        endRange:
+          type: integer
+          description: End index of current page
+
+    PaginationResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+          description: Array of items for current page
+        message:
+          type: string
+          description: Success message
+          default: Successfully!
+        status:
+          type: integer
+          description: HTTP status code
+          default: 200
+        metadata:
+          $ref: '#/components/schemas/PaginationMetadata'
+
+paths:
+  # /demo/pagination:
+  #   get:
+  #     tags:
+  #       - Demo
+  #     summary: Get Pagination
+  #     parameters:
+  #       - in: query
+  #         name: page
+  #         schema:
+  #           type: integer
+  #           default: 1
+  #         description: Page number
+  #       - in: query
+  #         name: take
+  #         schema:
+  #           type: integer
+  #           default: 10
+  #         description: Items per page
+  #     responses:
+  #       '200':
+  #         description: Successful pagination response
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/PaginationResponse'
+  #             example:
+  #               data: [{ id: 1, name: 'Item 1' }, { id: 2, name: 'Item 2' }]
+  #               message: 'Successfully!'
+  #               status: 200
+  #               metadata:
+  #                 take: 10
+  #                 page: 1
+  #                 itemCount: 20
+  #                 pageCount: 2
+  #                 hasPreviousPage: false
+  #                 hasNextPage: true
+  #                 beginRange: 1
+  #                 endRange: 10
+
+  # /demo/success:
+  #   get:
+  #     tags:
+  #       - Demo
+  #     summary: Get Success
+  #     responses:
+  #       '200':
+  #         description: Successful response
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/ItemResponse'
+  #             example:
+  #               name: 'OK'
+  #               code: 200
+  #               message: 'Operation successful'
+  #               data: { result: 'some data' }
+
+  # /demo/error:
+  #   get:
+  #     tags:
+  #       - Demo
+  #     summary: Get Error
+  #     responses:
+  #       '400':
+  #         description: Error response
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/Error'
+  #             example:
+  #               name: 'Bad Request'
+  #               code: 400
+  #               message: 'Invalid input'
+
+  # /demo/validator:
+  #   post:
+  #     tags:
+  #       - Demo
+  #     summary: Validate Email
+  #     requestBody:
+  #       required: true
+  #       content:
+  #         application/json:
+  #           schema:
+  #             type: object
+  #             properties:
+  #               email:
+  #                 type: string
+  #                 format: email
+  #             required:
+  #               - email
+  #           example:
+  #             email: 'example@mail.com'
+  #     responses:
+  #       '200':
+  #         description: Successful validation
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/ItemResponse'
+  #             example:
+  #               name: 'OK'
+  #               code: 200
+  #               message: 'Successfully!'
+  #               data:
+  #                 email: 'triquandn2003@gmail.com'
+  #       '400':
+  #         description: Invalid email
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/Error'
+  #             example:
+  #               name: 'Bad Request'
+  #               code: 400
+  #               message: [{ field: [string'], error: 'string' }]
+
+  # /images/{encodedImage}:
+  #   get:
+  #     tags:
+  #       - Images
+  #     summary: Get image by encoded key
+  #     parameters:
+  #       - name: encodedImage
+  #         in: path
+  #         schema:
+  #           type: string
+  #         required: true
+  #     responses:
+  #       '200':
+  #         description: Return Image
+  # /images/upload-single:
+  # post:
+  #   summary: Upload single image
+  #   requestBody:
+  #     required: true
+  #     content:
+  #       multipart/form-data:
+  #         schema:
+  #           type: object
+  #           properties:
+  #             image:
+  #               type: string
+  #               format: binary
+  #           required:
+  #             - image
+  #   tags:
+  #     - Images
+  #   responses:
+  #     '200':
+  #       description: Return Image Id
+
+  /resources:
+    get:
+      tags:
+        - Resources
+      summary: Get List Resources
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Page number
+        - in: query
+          name: take
+          schema:
+            type: integer
+            default: 10
+          description: Items per page
+      responses:
+        '200':
+          description: Successfully retrieved resources
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginationResponse'
+              example:
+                data:
+                  [
+                    { id: '1', firstName: 'John', lastName: 'Doe' },
+                    { id: '2', firstName: 'Jane', lastName: 'Smith' },
+                  ]
+                message: 'Successfully retrieved resources!'
+                status: 200
+                metadata:
+                  take: 10
+                  page: 1
+                  itemCount: 20
+                  pageCount: 2
+                  hasPreviousPage: false
+                  hasNextPage: true
+                  beginRange: 1
+                  endRange: 10
+    post:
+      tags:
+        - Resources
+      summary: Create New Resource
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+              required:
+                - firstName
+                - lastName
+            example:
+              firstName: 'John'
+              lastName: 'Doe'
+      responses:
+        '201':
+          description: Resource created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponse'
+              example:
+                name: 'Created'
+                code: 201
+                message: 'Successfully created resource!'
+                data:
+                  id: '1'
+                  firstName: 'John'
+                  lastName: 'Doe'
+        # '400':
+        #   $ref: '#/components/responses/BadRequest'
+
+  /resources/{id}:
+    get:
+      tags:
+        - Resources
+      summary: Get Resource Detail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Resource ID
+      responses:
+        '200':
+          description: Successfully retrieved resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponse'
+              example:
+                name: 'OK'
+                code: 200
+                message: 'Successfully!'
+                data:
+                  id: '1'
+                  firstName: 'John'
+                  lastName: 'Doe'
+        # '404':
+        #   $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags:
+        - Resources
+      summary: Update Resource
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Resource ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+              required:
+                - firstName
+                - lastName
+            example:
+              firstName: 'John'
+              lastName: 'Doe'
+      responses:
+        '200':
+          description: Resource updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponse'
+              example:
+                name: 'OK'
+                code: 200
+                message: 'Successfully updated resource!'
+                data:
+                  id: '1'
+                  firstName: 'John'
+                  lastName: 'Doe'
+        # '404':
+        #   $ref: '#/components/responses/NotFound'
+        # '400':
+        #   $ref: '#/components/responses/BadRequest'
+
+    delete:
+      tags:
+        - Resources
+      summary: Delete Resource
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Resource ID
+      responses:
+        '200':
+          description: Resource deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponse'
+              example:
+                name: 'OK'
+                code: 200
+                message: 'Successfully deleted resource!'
+                data:
+                  id: '1'
+                  firstName: 'John'
+                  lastName: 'Doe'
+        # '404':
+        #   $ref: '#/components/responses/NotFound'

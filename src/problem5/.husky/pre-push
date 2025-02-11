@@ -1,0 +1,18 @@
+
+local_branch_name="$(git rev-parse --abbrev-ref HEAD)"
+
+if [[ "$local_branch_name" == "develop" ]] || [[ "$local_branch_name" == "master" ]]; then
+    exit 0
+fi
+
+valid_branch_regex="^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test|hotfix|opt|init|bug|deploy|setup)/[a-z0-9._-]+$"
+
+message="The branch name '$local_branch_name' is invalid. Branch names must follow the format: build/*, chore/*, ci/*, docs/*, feat/*, fix/*, perf/*, refactor/*, revert/*, style/*, test/*, hotfix/*, opt/*, init/*, bug/*, deploy/*, setup/*"
+
+if [[ ! $local_branch_name =~ $valid_branch_regex ]]
+then
+    echo "$message"
+    exit 1
+fi
+
+exit 0
